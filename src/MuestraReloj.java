@@ -7,12 +7,17 @@ import javax.swing.JFrame;
 import javax.swing.SwingConstants;
 
 
-public class MuestraReloj /*implements AlarmaListener*/ {
+public class MuestraReloj implements RelojListener {
 
-	/*public synchronized alarmaActivada(AlarmaEvent evt){
-		//Mandar mensaje
+
+	public void cambioHoraAlarma(RelojEvent e){
+
 	}
-	*/
+
+	public void inicioAlarma(RelojEvent e){
+
+	}
+
 	public static void main(String[] args) {
 		Reloj relojChetumal = new Reloj();
 		Reloj relojMexico = new Reloj();
@@ -22,19 +27,12 @@ public class MuestraReloj /*implements AlarmaListener*/ {
 		
 //		AlarmaListener oyenteAlarma1 = new AlarmaListener();
 //		relojChetumal.addAlarmaListener(this);
-		
-		
+
 		JFrame ventana = new JFrame("Relojes");
 		Container contentpane = ventana.getContentPane();
 		
 		ventana.setSize(500, 500);
 		ventana.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		/*
-		contentpane.setLayout(new FlowLayout(FlowLayout.LEFT));
-		contentpane.add(relojChetumal);
-		contentpane.add(relojMexico);
-		*/
-		//relojChetumal.setAlignmentY(SwingConstants.CENTER);
 		
 		contentpane.add(relojChetumal, BorderLayout.NORTH);
 		contentpane.add(relojMexico, BorderLayout.CENTER);

@@ -1,21 +1,28 @@
 import java.awt.Graphics.*; 
 import java.awt.geom.Ellipse2D;
+import java.io.Serializable;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.* ;
 import java.awt.* ;
 
 import javax.swing.JPanel;
 
-public class Reloj extends JPanel implements Runnable { 
-	//Detectar presionado de teclas
-	//implementar keyListener
-	
-	//public void keyPressed(keyEvent e){
-	      //generar evento presionado de teclas
-	      //recorrer vector de listener de presionado de teclas
-	
-	//}
-	
-	Thread UnHilo;
+public class Reloj extends JPanel implements Runnable, Serializable {
+
+	private Thread unHilo;
+	private Date horaAlarma;
+	private boolean alarmaActivada = false;
+
+	private Vector relojListeners=new Vector();
+
+	public synchronized void addRelojListener(RelojListener listener){
+		relojListeners.addElement(listener);
+	}
+
+	public synchronized void removeRelojListener(RelojListener listener){
+		relojListeners.removeElement(listener);
+	}
 
 	public Reloj(){
 		//this.setSize(100, 100);
@@ -24,13 +31,78 @@ public class Reloj extends JPanel implements Runnable {
 		this.setBackground(new Color((int) (Math.random() * 255), 
 				(int) (Math.random() * 255), 
 				(int) (Math.random() * 255)) );
+
 	}
-	
-	public void paintComponent(Graphics g) { 
+
+	public Date getHoraAlarma() {
+		return horaAlarma;
+	}
+
+	public void setHoraAlarma(Date horaAlarma) {
+		this.horaAlarma = horaAlarma;
+
+		//Crear el evento
+		RelojEvent evento = new RelojEvent(this, horaAlarma);
+
+		//Llamar a método que ejecuta los métodos controladores de los listeners del vector
+		ejecutarMetodosControladoresCambioAlarma(evento);
+
+	}
+
+	private void ejecutarMetodosControladoresCambioAlarma(RelojEvent evt){
+		Vector lista;
+		synchronized(this){
+			lista = (Vector) relojListeners.clone();
+		}
+
+		for(int i=0; i<lista.size(); i++){
+			RelojListener listener=(RelojListener) lista.elementAt(i);
+			listener.cambioHoraAlarma(evt);
+		}
+	}
+
+	private void ejecutarMetodosControladoresInicioAlarma(RelojEvent evt){
+		Vector lista;
+		synchronized(this){
+			lista = (Vector) relojListeners.clone();
+		}
+
+		for(int i=0; i<lista.size(); i++){
+			RelojListener listener=(RelojListener) lista.elementAt(i);
+			listener.inicioAlarma(evt);
+		}
+	}
+
+	public void iniciarAlarma(){
+		//Reproducción de audio
+		System.out.println("Alarma activada");
+		//Activar la bandera de la alarma
+		alarmaActivada = true;
+
+		//Crear evento
+		RelojEvent evento = new RelojEvent(this, this.horaAlarma);
+
+		//Llamar a métodos controladores del inicio de alarma
+		ejecutarMetodosControladoresInicioAlarma(evento);
+	}
+
+	public void detenerAlarma(){
+		//Detener reproducción de audio
+		System.out.println("Alarma desactivada");
+		//Desactiva la bandera de la alarma
+		alarmaActivada = false;
+	}
+
+	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		Date ahora = new Date();
-		
-		int anchoTexto = g.getFontMetrics().stringWidth(ahora.getHours() + ":" 
+
+		//Validación de hora para iniciar alarma
+		if (!alarmaActivada && ahora.compareTo(this.horaAlarma) > 0){
+			this.iniciarAlarma();
+		}
+
+		int anchoTexto = g.getFontMetrics().stringWidth(ahora.getHours() + ":"
 				+ ahora.getMinutes() + ":"
 				+ ahora.getSeconds());
 		int altoTexto = g.getFontMetrics().getHeight();
@@ -104,10 +176,10 @@ public class Reloj extends JPanel implements Runnable {
 	
 	public void start()
 	{
-		if (UnHilo == null)
+		if (unHilo == null)
 		{
-			UnHilo = new Thread(this, "Reloj");
-			UnHilo.start();//Método start de la clase Thread 
+			unHilo = new Thread(this, "Reloj");
+			unHilo.start();//Método start de la clase Thread
 		}
 	}
 		
@@ -119,13 +191,13 @@ public class Reloj extends JPanel implements Runnable {
 			//Llamar a método que ejecuta métodos de listeners
 			
 			try {
-				UnHilo.sleep(10);
+				unHilo.sleep(1000);
 			}catch (Exception e) {} 
 		}
 	}
 	
 	public void stop() { 
-		UnHilo.stop(); //Para el hilo
-		UnHilo = null; 
+		unHilo.stop(); //Para el hilo
+		unHilo = null;
 	}
 }
