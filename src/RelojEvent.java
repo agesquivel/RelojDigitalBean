@@ -18,4 +18,6 @@ public class RelojEvent extends EventObject {
     public Object getSource(){
         return objFuente;
     }
+
 }
+

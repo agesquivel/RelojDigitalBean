@@ -8,7 +8,8 @@ import java.awt.* ;
 
 import javax.swing.JPanel;
 
-public class Reloj extends JPanel implements Runnable, Serializable {
+public class Reloj extends JPanel implements Runnable,
+        Serializable {
 
 	private Thread unHilo;
 	private Date horaAlarma;

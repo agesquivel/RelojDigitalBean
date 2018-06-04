@@ -48,5 +48,4 @@ public class MuestraReloj implements RelojListener {
 	
 		ventana.setVisible(true);
 	}
-
 }
